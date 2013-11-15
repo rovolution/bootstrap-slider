@@ -22,7 +22,9 @@
 	var ErrorMsgs = {
 		formatInvalidInputErrorMsg : function(input) {
 			return "Invalid input value '" + input + "' passed in";
-		}
+		},
+		invalidRangeValueInOrdinalScale : "Invalid range value in 'ordinal'. Range values must be of type 'number'",
+		invalidInputValueForOrdinalScale : "Invalid input value for 'ordinal'"
 	};
 
 	var Slider = function(element, options) {
@@ -36,7 +38,50 @@
 			this[attr] = el.data('slider-' + attr) || options[attr] || el.prop(attr);
 		}, this);
 
-		//TODO: Validate 'ordinal' input here
+		if(this.ordinal) {
+			validateOrdinalScale(this.ordinal);
+			checkIfValueIsInOrdinalScaleDomain(this.value, this.ordinal);
+
+			var minAndMaxRangeValues = getMinAndMaxRangeValuesInOrdinalScale(ordinalScale);
+			this.min = minAndMaxRangeValues[0];
+			this.max = minAndMaxRangeValues[1];
+			this.step = 1; //TODO: Might need to revisit 'step' later
+		}
+
+		function validateOrdinalScale(ordinalScale) {
+			if(typeof ordinalScale === 'object') {
+				validateOrdinalScaleRangeValues(ordinalScale);
+			} else {
+				throw new Error(ErrorMsgs.invalidInputValueForOrdinalScale);
+			}
+		}
+
+		function validateOrdinalScaleRangeValues(ordinalScale) {
+			for(var domainValue in ordinalScale) {
+				if(ordinalScale.hasOwnProperty(domainValue)) {
+        			var rangeValue = ordinalScale[domainValue];
+        			if(type rangeValue !== 'number') {
+        				throw new Error(ErrorMsgs.invalidRangeValueInOrdinalScale);
+        			}
+      			}
+			}
+		}
+
+		function checkIfValueIsInOrdinalScaleDomain(value, ordinalScale) {
+			if(!ordinalScale[value]) {
+				var errorMessage = Error.formatInvalidInputErrorMsg(value);
+				throw new Error(errorMessage);
+			}
+		}
+
+		function getMinAndMaxRangeValuesInOrdinalScale(ordinalScale) {
+			var rangeValues = Object.keys(ordinalScale).map(function(domainValue) {
+					return ordinalScale[domainValue];
+				}),
+				min = Math.min(rangeValues),
+				max = Math.max(rangeValues);
+			return[min, max];	
+		}
 
 		if (parent.hasClass('slider') === true) {
 			updateSlider = true;
@@ -396,10 +441,17 @@
 		},
 
 		getValue: function() {
-			if (this.range) {
-				return this.value;
+			if(this.ordinal) {
+				if (this.range) {
+					return this.value;
+				}
+				return this.value[0];
+			} else {
+				if (this.range) {
+					return this.value;
+				}
+				return this.value[0];
 			}
-			return this.value[0];
 		},
 
 		setValue: function(val) {
@@ -437,7 +489,7 @@
 		isValueInOrdinalDomain : function(val) {
 			var rangeValue = this.ordinal[val];
 			if(rangeValue) {
-				return val;
+				return rangeValue;
 			} else {
 				throw new Error( ErrorMsgs.formatInvalidInputErrorMsg(val) );
 			}
