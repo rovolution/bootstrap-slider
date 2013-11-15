@@ -26,12 +26,17 @@
 	};
 
 	var Slider = function(element, options) {
-		var el = this.element = $(element).hide();
-		var origWidth = el.outerWidth();
+		var el = this.element = $(element).hide()
+			origWidth = el.outerWidth(),
+			updateSlider = false,
+			parent = this.element.parent();
 
-		var updateSlider = false;
-		var parent = this.element.parent();
 
+		['min', 'max', 'step', 'value', 'ordinal'].forEach(function(attr) {
+			this[attr] = el.data('slider-' + attr) || options[attr] || el.prop(attr);
+		}, this);
+
+		//TODO: Validate 'ordinal' input here
 
 		if (parent.hasClass('slider') === true) {
 			updateSlider = true;
@@ -83,10 +88,6 @@
 				this.tooltip.addClass('top')[0].style.top = -this.tooltip.outerHeight() - 14 + 'px';
 				break;
 		}
-
-		['min', 'max', 'step', 'value'].forEach(function(attr) {
-			this[attr] = el.data('slider-' + attr) || options[attr] || el.prop(attr);
-		}, this);
 
 		if (this.value instanceof Array) {
 			this.range = true;
@@ -190,8 +191,7 @@
 
 		this.enabled = options.enabled && 
 						(this.element.data('slider-enabled') === undefined || this.element.data('slider-enabled') === true);
-		if(!this.enabled)
-		{
+		if(!this.enabled) {
 			this.disable();
 		}
 	};
@@ -427,6 +427,23 @@
 		},
 
 		validateInputValue : function(val) {
+			if(this.ordinal) {
+				return this.isValueInOrdinalDomain(val);
+			} else {
+				return this.isValueNumeric(val);
+			}
+		},
+
+		isValueInOrdinalDomain : function(val) {
+			var rangeValue = this.ordinal[val];
+			if(rangeValue) {
+				return val;
+			} else {
+				throw new Error( ErrorMsgs.formatInvalidInputErrorMsg(val) );
+			}
+		},
+
+		isValueNumeric: function(val) { 
 			if(typeof val === 'number') {
 				return val;
 			} else if(val instanceof Array) {
@@ -518,6 +535,7 @@
 		handle: 'round',
 		reversed : false,
 		enabled: true,
+		ordinal : false,
 		formater: function(value) {
 			return value;
 		}

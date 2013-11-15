@@ -417,6 +417,39 @@ $("#ex7-enabled").click(function() {
       	</div>
       </div>
 
+      <div class='slider-example'>
+      		<h3>Example 8:</h3>
+      		<p>Slider can slide along ordinal scale.</p>
+      		<div class="well">
+      			<input id="ex8" type="text"/>
+      		</div>
+      		<pre><code>
+###################
+       HTML	
+###################
+
+&ltinput id="ex7" type="text" data-slider-min="0" data-slider-max="20" data-slider-step="1" data-slider-value="5" data-slider-enabled="false"/&gt
+&ltinput id="ex7-enabled" type="checkbox"/&gt Enabled
+
+
+###################
+    JavaScript	
+###################
+
+$("#ex7").slider();
+$("#ex7-enabled").click(function() {
+	if(this.checked) {
+		$("#ex7").slider("enable");
+	}
+	else {
+		$("#ex7").slider("disable");
+	}
+});
+
+            </code></pre>
+      	</div>
+      </div>
+
     </div> <!-- /container -->
 
 
@@ -476,6 +509,24 @@ $("#ex7-enabled").click(function() {
 				}
 				else {
 					$("#ex7").slider("disable");
+				}
+			});
+
+			/* Example 8 */
+			$("#ex8").slider({
+				ordinal: {
+					"January" : 1,
+					"February" : 2,
+					"March" : 3,
+					"April" : 4,
+					"May" : 5,
+					"June" : 6,
+					"July" : 7,
+					"August" : 8,
+					"September" : 9,
+					"October" : 10,
+					"November" : 11,
+					"December" : 12
 				}
 			});
     	});
