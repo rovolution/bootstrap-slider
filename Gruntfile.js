@@ -60,7 +60,8 @@ module.exports = function(grunt) {
             spyOn: false,
             spyOnEvent: false,
             waitsFor: false,
-            xdescribe: false
+            xdescribe: false,
+            Objects: true
           }
         }
       }

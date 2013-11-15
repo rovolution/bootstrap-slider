@@ -135,22 +135,63 @@ describe("Public Method Tests", function() {
       expect(isEnabled).not.toBeTruthy();
     });
 
-    describe("reads and sets the slider to use an ordinal scale from the 'ordinal' option", function() {
-      
-      it("throws an error if I pass an invalid value for an ordinal scale", function() {
+    describe("'ordinal' option", function() {
+      it("properly reads and sets the slider to use an ordinal scale", function() {
+        var ordinalScale = {
+              "January" : 1,
+              "February" : 2
+            };
+        
+        var createSliderWithOrdinalScale = function() {
+          testSlider = $("#testSlider1").slider({
+            ordinal : ordinalScale
+          });
+        };
+        expect(createSliderWithOrdinalScale).not.toThrow();
+      });
 
+      it("throws an error if I pass an invalid value for an ordinal scale", function() {
+        var invalidOrdinalScale = "invalid ordinal value",
+            error = new Error("Invalid input value for 'ordinal'");
+
+        var settingInvalidOrdinalValue = function() {
+            testSlider = $("#testSlider1").slider({
+              ordinal: invalidOrdinalScale
+            });
+        };
+        expect(settingInvalidOrdinalValue).toThrow(error);
       });
 
       it("throws an error if one of the range values in my ordinal scale is non-numeric", function() {
+        var invalidOrdinalScale = {
+              "January" : 1,
+              "February" : "4"
+            },
+            error = new Error("Invalid range value in 'ordinal'. Range values must be of type 'number'");
 
+        var settingInvalidOrdinalRangeValue = function() {
+            testSlider = $("#testSlider1").slider({
+              ordinal: invalidOrdinalScale
+            });
+        };
+        expect(settingInvalidOrdinalRangeValue).toThrow(error);
       });
 
-      it("throws an error if 'min' option is not within domain of ordinal scale", function() {
+      it("throws an error if 'value' option is not within domain of ordinal scale", function() {
+        var ordinalScale = {
+              "January" : 1,
+              "February" : 2
+            },
+            invalidValue = "March",
+            error = new Error("Invalid input value '" + invalidValue + "' passed in");
 
-      });
-
-      it("throws an error if 'max' option is not within domain of ordinal scale", function() {
-
+        var settingInvalidOrdinalRangeValue = function() {
+            testSlider = $("#testSlider1").slider({
+              ordinal: ordinalScale,
+              value: invalidValue
+            });
+        };
+        expect(settingInvalidOrdinalRangeValue).toThrow(error);
       });
     });
 
@@ -269,38 +310,115 @@ describe("Public Method Tests", function() {
       });
 
       describe("if either value is of invalid type", function() {
-        var invalidValue = "a",
-            otherValue = 7;
+        var invalidValue, otherValue, errorMsg, error;
+
+        beforeEach(function() {
+          invalidValue = "a";
+          otherValue = 7;
+          errorMsg = formatInvalidInputMsg(invalidValue);
+          error = new Error(errorMsg);
+        });
 
         it("first value is of invalid type", function() {
           var setSliderValueFn = function() {
             testSlider.slider('setValue', [invalidValue, otherValue]);
           };
-          expect(setSliderValueFn).toThrow(new Error( formatInvalidInputMsg(invalidValue) ));
+          expect(setSliderValueFn).toThrow(error);
         });
+
         it("second value is of invalid type", function() {
           var setSliderValueFn = function() {
             testSlider.slider('setValue', [otherValue, invalidValue]);
           };
-          expect(setSliderValueFn).toThrow(new Error( formatInvalidInputMsg(invalidValue) ));
+          expect(setSliderValueFn).toThrow(error);
         });
       });
     });
 
     describe("if slider is configured with ordinal scale", function() {
       describe("single value slider", function() {
-        it("throws an error if value is not in sliders domain", function() {
+        beforeEach(function() {
+          testSlider = $("#testSlider1").slider({
+            ordinal : {
+              "January" : 1,
+              "February" : 2,
+              "March" : 3,
+              "April" : 4,
+              "May" : 5
+            }
+          });
+        });
 
+        it("properly sets slider value if it is in ordinal scale domain", function() {
+          var valToSet = "March";
+          testSlider.slider('setValue', valToSet);
+
+          var sliderValue = testSlider.slider('getValue'),
+              sliderValueDomain = Object.keys(sliderValue)[0];
+          expect(sliderValueDomain).toBe(valToSet);
+        });
+
+        it("throws an error if value is not in ordinal scale's domain", function() {
+          var valToSet = "December",
+              errorMsg = formatInvalidInputMsg(valToSet),
+              error = new Error(errorMsg);
+          
+          var setSliderValue = function() {
+            testSlider.slider('setValue', valToSet);
+          };
+          expect(setSliderValue).toThrow(error);
         });
       });
 
       describe("range slider", function() {
-        it("throws an error if first value is not in slider domain", function() {
-
+        beforeEach(function() {
+          testSlider = $("#testSlider1").slider({
+            ordinal : {
+              "January" : 1,
+              "February" : 2,
+              "March" : 3,
+              "April" : 4,
+              "May" : 5
+            },
+            value : ["January", "February"]
+          });
         });
 
-        it("throws an error if second value is not in slider domain", function() {
+        it("properly sets slider value if both values are in the ordinal scale domain", function() {
+          var valuesToSet = ["March", "January"];
+          testSlider.slider('setValue', valuesToSet);
 
+          var sliderValues = testSlider.slider('getValue'),
+              firstSliderKey = Object.keys(sliderValues[0])[0],
+              secondSliderKey = Object.keys(sliderValues[1])[0];
+          
+          expect(firstSliderKey).toBe(valuesToSet[0]);
+          expect(secondSliderKey).toBe(valuesToSet[1]);
+        });
+
+        describe("throws an error", function() {
+          var invalidValue, otherValue, errorMsg, error;
+
+          beforeEach(function() {
+            invalidValue = "December";
+            otherValue = "April";
+            errorMsg = formatInvalidInputMsg(invalidValue);
+            error = new Error(errorMsg);
+          });
+
+          it("if first value is not in ordinal scale domain", function() {
+            var setSliderValue = function() {
+              testSlider.slider('setValue', [invalidValue, otherValue]);
+            };
+            expect(setSliderValue).toThrow(error);
+          });
+
+          it("if second value is not in ordinal scale's domain", function() {
+            var setSliderValue = function() {
+              testSlider.slider('setValue', [otherValue, invalidValue]);
+            };
+            expect(setSliderValue).toThrow(error);
+          });
         });
       });
     });
@@ -309,12 +427,9 @@ describe("Public Method Tests", function() {
 
 
   describe("'getValue()' tests", function() {
-    beforeEach(function() {
-      testSlider = $("#testSlider1").slider();
-    });
-
     it("returns the current value of the slider", function() {
       var valueToSet = 5;
+      testSlider = $("#testSlider1").slider();
       testSlider.slider('setValue', valueToSet);
 
       var sliderValue = testSlider.slider('getValue');
@@ -323,22 +438,60 @@ describe("Public Method Tests", function() {
 
     describe("if slider is configured with ordinal scale", function() {
       describe("single value slider", function() {
-        it("throws an error if value is not in sliders domain", function() {
-          
+        beforeEach(function() {
+          testSlider = $("#testSlider1").slider({
+            ordinal : {
+              "January" : 1,
+              "February" : 2,
+              "March" : 3,
+              "April" : 4,
+              "May" : 5
+            },
+            value : ["April"]
+          });
+        });
+
+        it("returns object containing domain-range of currently set slider value", function() {
+          var sliderValue = testSlider.slider('getValue'),
+              sliderValueDomain = Objects.key(sliderValue)[0],
+              sliderValueRange = sliderValue[sliderValueDomain];
+
+          expect(sliderValueDomain).toBe("April");
+          expect(sliderValueRange).toBe(4);
         });
       });
 
       describe("range slider", function() {
-        it("throws an error if first value is not in slider domain", function() {
-          
+        beforeEach(function() {
+          testSlider = $("#testSlider1").slider({
+            ordinal : {
+              "January" : 1,
+              "February" : 2,
+              "March" : 3,
+              "April" : 4,
+              "May" : 5
+            },
+            value : ["January", "February"]
+          });
         });
 
-        it("throws an error if second value is not in slider domain", function() {
-          
+        it("returns array of objects containing domains-ranges of currently set slider values", function() {
+          var sliderValue = testSlider.slider('getValue'),
+              firstSliderValue = sliderValue[0],
+              secondSliderValue = sliderValue[1],
+              firstSliderValueDomain = Objects.key(firstSliderValue)[0],
+              firstSliderValueRange = firstSliderValue[firstSliderValueDomain],
+              secondSliderValueDomain = Objects.key(secondSliderValue)[0],
+              secondSliderValueRange = secondSliderValue[secondSliderValueDomain];
+
+          expect(firstSliderValueDomain).toBe("January");
+          expect(firstSliderValueRange).toBe(1);
+          expect(secondSliderValueDomain).toBe("February");
+          expect(secondSliderValueRange).toBe(2);
         });
       });
     });
-    
+
   });
 
 
