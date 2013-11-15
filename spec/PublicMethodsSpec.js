@@ -134,6 +134,26 @@ describe("Public Method Tests", function() {
       var isEnabled = testSlider.slider('isEnabled');
       expect(isEnabled).not.toBeTruthy();
     });
+
+    describe("reads and sets the slider to use an ordinal scale from the 'ordinal' option", function() {
+      
+      it("throws an error if I pass an invalid value for an ordinal scale", function() {
+
+      });
+
+      it("throws an error if one of the range values in my ordinal scale is non-numeric", function() {
+
+      });
+
+      it("throws an error if 'min' option is not within domain of ordinal scale", function() {
+
+      });
+
+      it("throws an error if 'max' option is not within domain of ordinal scale", function() {
+
+      });
+    });
+
   });
 
 
@@ -266,6 +286,25 @@ describe("Public Method Tests", function() {
         });
       });
     });
+
+    describe("if slider is configured with ordinal scale", function() {
+      describe("single value slider", function() {
+        it("throws an error if value is not in sliders domain", function() {
+
+        });
+      });
+
+      describe("range slider", function() {
+        it("throws an error if first value is not in slider domain", function() {
+
+        });
+
+        it("throws an error if second value is not in slider domain", function() {
+
+        });
+      });
+    });
+
   });
 
 
@@ -281,6 +320,25 @@ describe("Public Method Tests", function() {
       var sliderValue = testSlider.slider('getValue');
       expect(sliderValue).toBe(valueToSet);
     });
+
+    describe("if slider is configured with ordinal scale", function() {
+      describe("single value slider", function() {
+        it("throws an error if value is not in sliders domain", function() {
+          
+        });
+      });
+
+      describe("range slider", function() {
+        it("throws an error if first value is not in slider domain", function() {
+          
+        });
+
+        it("throws an error if second value is not in slider domain", function() {
+          
+        });
+      });
+    });
+    
   });
 
 
@@ -416,7 +474,6 @@ describe("Public Method Tests", function() {
     var invokingNonPublicMethod = function() { testSlider.slider(nonPublicMethodName); };
     expect(invokingNonPublicMethod).toThrow(new Error("method '" + nonPublicMethodName + "()' does not exist for slider."));
   });
-
 
   afterEach(function() {
     if(testSlider) {
